@@ -1,25 +1,86 @@
 ---
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
+title: "Assignment one for the course: Reproducible Research "
+author: "TeokKK"
+date: "Monday, January 12, 2015"
+output: html_document
 ---
 
 
-## Loading and preprocessing the data
+Read in the activity  monitor dataset and stored in data
 
 
+```{r,echo=TRUE}
+library(plyr)
+data<-read.csv("activity.csv")
 
-## What is mean total number of steps taken per day?
+```
+
+Histogram of the total number os steps taken per day:
+
+```{r, echo=TRUE}
+int<-data[!is.na(data$steps),c(1,2,3)]
+dd<-ddply(int,.(date),summarize,sum=sum(steps))
+hist(dd[,2],main="Histogram of Total Number of Steps with",xlab="Total Steps")
+
+```
+
+The mean and median steps taken per day are
+```{r, echo=TRUE}
+ddply(int,.(date),summarize,mean=mean(steps),median=median(steps))
+
+```
+time series plot
+```{r, echo=TRUE}
+dd2<-ddply(int,.(interval),summarize,mean=mean(steps))
+plot(dd2,type="l",main="5-minute interval (x-axis) VS average number of steps taken")
+```
+Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+```{r, echo=TRUE}
+dd2[which.max(dd2[,2]),1]
+```
+Imputing missing values
+
+alculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs:
+```
+{r, echo=TRUE}
+sum(is.na(data$steps))
+```
+Replace the missing steps value by the same day mean value.
+```{r, echo=TRUE}
+mydata<-data
+ll<-dim(data)
+
+for(i in 1:ll[1])
+{
+  
+  if(is.na(mydata[i,1]))
+  {
+    y<-mydata[i,3]
+    mydata[i,1]<-(dd2[dd2$interval==y,2])
+   
+  }
+
+}
 
 
+```
+Histogram of the total number os steps taken per day:
 
-## What is the average daily activity pattern?
+```{r, echo=TRUE}
 
+dd4<-ddply(mydata,.(date),summarize,sum=sum(steps))
+hist(dd4[,2],main="Histogram of Total Number of Steps with missing values filled",xlab="Total Steps")
 
+```
+The mean and median steps taken per day are
+```{r, echo=TRUE}
+ddply(mydata,.(date),summarize,mean=mean(steps),median=median(steps))
 
-## Imputing missing values
+```
+Convert date column to date format and add one more coloumn (week) to indicate whether is weekend or weekday
 
+```{r, echo=TRUE}
+mydata$date<-as.Date(mydata$date,"%Y-%m-%d")
 
-
-## Are there differences in activity patterns between weekdays and weekends?
+mydata$week<-ifelse(weekdays(mydata$date)=="Sunday"| weekdays(mydata$date)=="Saturday" ,"weekend","weekday")
+  ```
