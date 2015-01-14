@@ -1,9 +1,6 @@
----
-title: "Assignment one for the course: Reproducible Research "
-author: "TeokKK"
-date: "Monday, January 12, 2015"
-output: html_document
----
+
+Assignment 1 for Reproducible Research
+
 
 Load the necessary libraries
 
@@ -22,37 +19,36 @@ data<-read.csv("activity.csv")
 
 ```
 
-Histogram of the total number os steps taken per day:
+Plot the histogram of the total number of steps taken per day (ignoring NA):
 
 ```{r, echo=TRUE}
 int<-data[!is.na(data$steps),c(1,2,3)]
 dd<-ddply(int,.(date),summarize,sum=sum(steps))
-hist(dd[,2],main="Histogram of Total Number of Steps with",xlab="Total Steps")
+hist(dd[,2],main="Histogram of Total Number of Steps",xlab="Total Steps")
 
 ```
 
-The mean and median steps taken per day are
+The mean and median steps taken per day are:  
 ```{r, echo=TRUE}
 ddply(int,.(date),summarize,mean=mean(steps),median=median(steps))
 
 ```
-time series plot
+Plot the time series of 5-minute interval vs average number of steps taken:  
 ```{r, echo=TRUE}
 dd2<-ddply(int,.(interval),summarize,mean=mean(steps))
 plot(dd2,type="l",main="5-minute interval (x-axis) VS average number of steps taken")
 ```
-Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+The 5-minute interval that had the maximum number of steps:  
 ```{r, echo=TRUE}
 dd2[which.max(dd2[,2]),1]
 ```
-Imputing missing values
+Inputing missing values
 
-alculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs:
-```
-{r, echo=TRUE}
+There are lot of missing steps value that is presented as NA. Calculate the total number of missing values in the dataset (i.e. the total number of rows with NAs):
+```{r, echo=TRUE}
 sum(is.na(data$steps))
 ```
-Replace the missing steps value by the same day mean value.
+To replace the missing steps value by the same day mean vlibalue.  
 ```{r, echo=TRUE}
 mydata<-data
 ll<-dim(data)
@@ -71,7 +67,7 @@ for(i in 1:ll[1])
 
 
 ```
-Histogram of the total number os steps taken per day:
+Histogram of the total number oF steps taken per day:  
 
 ```{r, echo=TRUE}
 
@@ -90,8 +86,13 @@ Convert date column to date format and add one more coloumn (week) to indicate w
 mydata$date<-as.Date(mydata$date,"%Y-%m-%d")
 
 mydata$week<-ifelse(weekdays(mydata$date)=="Sunday"| weekdays(mydata$date)=="Saturday" ,"weekend","weekday")
+ ```
+Compute the mean steps across interval for different day.
+```{r, echo=TRUE}
 pp<-ddply(mydata,.(interval,week),summarize,mean=mean(steps))
-
+ ```
+Plot panel time series of interval mean step for weekday and weekend.
+```{r, echo=TRUE}
 g<-qplot(interval,mean,data=pp,facets=.~week)+geom_line()
 print(g)
   ```
